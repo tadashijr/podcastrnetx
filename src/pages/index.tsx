@@ -1,42 +1,23 @@
-// SPA -- dados carregados quando usuário acessa a aplicação (requisições são executadas no JS do browser)
-// useEffect(() => {
-//   fetch('http://localhost:3333/episodes')
-//     .then(response => response.json())
-//     .then(data => console.log(data))
-// }, []);
-
-
-// SSR  -- dados serão renderizados toda vez que a home for acessada
-// export async function getServerSideProps(){
-//   const response = await fetch('http://localhost:3333/episodes')
-//   const data = await response.json()
-
-//   return {
-//     props: {
-//       episodes: data,
-//     }
-//   }
-
-// SSG
-
-import { GetServerSideProps, GetStaticProps } from 'next';
-import Image from 'next/image'
+import { GetServerSideProps, GetStaticPaths, GetStaticProps } from 'next';
+import Image from 'next/image';
+import Link from 'next/link';
 import { type } from 'node:os';
 import { api } from '../services/api';
 import { format, parseISO } from 'date-fns';
 import ptBR from 'date-fns/locale/pt-BR';
 import { convertDurationToTimeString } from '../Utils/convertDurationTOTimeString';
-
 import styles from '../pages/home.module.scss';
+import React from 'react';
 
 type Episode = {
   episodes: Array<{
     id: string;
     title: string;
     thumbnail: string;
-    description: string;
+    //description: string;
     members: string;
     duration: string;
+    duration_as_string: string;
     url: string;
     publishedAt: string;
   }>
@@ -66,7 +47,9 @@ export default function Home({ latestEpisodes, allEpisodes }: HomeProps) {
                 />
 
                 <div className={styles.episodesDetails}>
-                  <a href={`/episodes/${episode.id}yarn`}>{episode.title}</a>
+                  <Link  href={`/episodes/${episode.id}`}>
+                    <a>{episode.title}</a>                 
+                  </Link>
                   <p>{episode.members}</p>
                   <span>{episode.publishedAt}</span>
                   <span>{episode.durationAsString}</span>
@@ -111,7 +94,9 @@ export default function Home({ latestEpisodes, allEpisodes }: HomeProps) {
                         />
                   </td>
                   <td>
-                      <a href="">{episode.title}</a>
+                  <Link  href={`/episodes/${episode.id}`}>
+                      <a>{episode.title}</a>
+                  </Link>
                   </td>
                   <td>{episode.members}</td>
                   <td style={{width: 100}}>{episode.publishedAt}</td>
@@ -139,7 +124,7 @@ export const getStaticProps: GetStaticProps = async () => {
   const { data } = await api.get('episodes?', {
     params: {
       _limit: 12,
-      _sort: 'published_at',
+      _sort: 'published_at', 
       _order: 'desc'
     }
   })
