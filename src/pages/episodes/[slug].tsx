@@ -1,14 +1,13 @@
-import { format, parseISO } from 'date-fns';
-import { GetStaticProps } from 'next';
-import { GetStaticPaths } from 'next';
-import {useRouter} from 'next/router'
-import ptBR from 'date-fns/locale/pt-BR';
-import { api } from '../../services/api';
-import { convertDurationToTimeString } from '../../Utils/convertDurationTOTimeString';
-import Image from 'next/image';
-
-import styles from './episode.module.scss';
+import { useRouter } from 'next/router'
 import Link from 'next/link';
+import { api } from '../../services/api';
+import { format, parseISO } from 'date-fns';
+import { GetStaticProps, GetStaticPaths } from 'next';
+import ptBR from 'date-fns/locale/pt-BR';
+import { convertDurationToTimeString } from '../../utils/convertDurationTOTimeString';
+import Image from 'next/image';
+import styles from './episode.module.scss';
+
 
 type Episode = {
     id: string;
@@ -20,31 +19,29 @@ type Episode = {
     url: string;
     publishedAt: string;
     description: string;
- }
+}
 
 type EpisodeProp = {
     episode: Episode;
-  }
- 
+}
+
 // 
-  
-  export default function Episode({episode} : EpisodeProp) {
+
+export default function Episode({ episode }: EpisodeProp) {
     return (
-        <div className={styles.episode}>  
+        <div className={styles.episode}>
             <div className={styles.thumbnailContainer}>
-                <Link  href="/">
+                <Link href="/">
                     <button type="button">
-                        <img src="/arrow-left.svg" alt="Voltar"/>
+                        <img src="/arrow-left.svg" alt="Voltar" />
                     </button>
                 </Link>
-                <button type="button">
-                    <Image 
+                    <Image
                         width={700}
                         height={160}
                         src={episode.thumbnail}
                         objectFit="cover"
                     />
-                </button>
                 <button type="button">
                     <img src="/play.svg" alt="Tocar Episódio" />
                 </button>
@@ -57,28 +54,28 @@ type EpisodeProp = {
                 <span>{episode.durationAsString}</span>
             </header>
 
-            <div 
-            className={styles.description} 
-            dangerouslySetInnerHTML={{ __html: episode.description}} 
-            /> 
+            <div
+                className={styles.description}
+                dangerouslySetInnerHTML={{ __html: episode.description }}
+            />
 
         </div>
     )
-  }
+}
 
 export const getStaticPaths: GetStaticPaths = async () => {
     return {
-      paths:[],
-      fallback: 'blocking'
+        paths: [],
+        fallback: 'blocking'
     }
-  }
+}
 
 export const getStaticProps: GetStaticProps = async (ctx) => {
-    const {slug} = ctx.params;
+    const { slug } = ctx.params;
 
-    const {data} = await api.get(`/episodes/${slug}`)
+    const { data } = await api.get(`/episodes/${slug}`)
 
-    const episodes = {
+    const episode = {
         id: data.id,
         title: data.title,
         thumbnail: data.thumbnail,
@@ -86,13 +83,14 @@ export const getStaticProps: GetStaticProps = async (ctx) => {
         publishedAt: format(parseISO(data.published_at), 'd MMM yy', { locale: ptBR }),
         duration: Number(data.duration),
         durationAsString: convertDurationToTimeString(Number(data.file.duration)),
+        description: data.description,
         url: data.file.url,
     };
 
     return {
         props: {
-            episodes,
+            episode,
         },
-        revalidate: 60 * 60 *24, // 24 horas
+        revalidate: 60 * 60 * 24, // 24 horas
     }
 }
