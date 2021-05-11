@@ -7,6 +7,10 @@ import ptBR from 'date-fns/locale/pt-BR';
 import { convertDurationToTimeString } from '../../utils/convertDurationTOTimeString';
 import Image from 'next/image';
 import styles from './episode.module.scss';
+import { Player } from '../../components/Player';
+import { PlayerContext, usePlayer} from '../../contexts/PlayerContext';
+import React from 'react';
+import Head from 'next/head';
 
 
 type Episode = {
@@ -14,7 +18,7 @@ type Episode = {
     title: string;
     thumbnail: string;
     members: string;
-    duration: string;
+    duration: number;
     durationAsString: string;
     url: string;
     publishedAt: string;
@@ -28,9 +32,16 @@ type EpisodeProp = {
 // 
 
 export default function Episode({ episode }: EpisodeProp) {
+    const {play} = usePlayer();
+
     return (
         <div className={styles.episode}>
             <div className={styles.thumbnailContainer}>
+
+        <Head>
+          <title>{episode.title} | Podcaster</title>
+        </Head>
+
                 <Link href="/">
                     <button type="button">
                         <img src="/arrow-left.svg" alt="Voltar" />
@@ -42,7 +53,7 @@ export default function Episode({ episode }: EpisodeProp) {
                         src={episode.thumbnail}
                         objectFit="cover"
                     />
-                <button type="button">
+                <button type="button" onClick={() => play(episode)}>
                     <img src="/play.svg" alt="Tocar Episódio" />
                 </button>
             </div>
